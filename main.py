@@ -3,7 +3,7 @@ from FastAPISchema import StudentDetails
 from fastapi.responses import FileResponse
 import pandas as pd
 app=FastAPI()
-lis=[{'register_number':1,'student_name':'sivarajan','student_attedence':12.4,'student_fee':90},{'register_number':2,'student_name':'jeeva','student_attedence':12.4,'student_fee':90}]
+lis=[]
 
 @app.post('/Add-Student')
 def AddUser(student_details:StudentDetails):
