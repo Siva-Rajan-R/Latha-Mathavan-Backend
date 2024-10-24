@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from FastAPISchema import StudentDetails
+from fastapi.responses import FileResponse
+import pandas as pd
 app=FastAPI()
-lis=[]
+lis=[{'register_number':1,'student_name':'sivarajan','student_attedence':12.4,'student_fee':90},{'register_number':2,'student_name':'jeeva','student_attedence':12.4,'student_fee':90}]
 
 @app.post('/Add-Student')
 def AddUser(student_details:StudentDetails):
@@ -45,3 +47,21 @@ def GetSingleStudent(student_details:StudentDetails):
         if i['register_number']==student_details.student_register_number:
             return {'detail':i}
     return {'detail':'No Student Found'}
+
+@app.get('/Download-Student')
+def DownloadStudent():
+    data = {
+        "Register Number": [],
+        "Student Name": [],
+        "Student Attedence": [],
+        'Student Fee':[]
+    }
+    for i in lis:
+        temp=['Register Number','Student Name','Student Attedence','Student Fee']
+        for j in i:
+            data[temp[0]].append(i[j])
+            temp.pop(0)
+    print(data)
+    df = pd.DataFrame(data)
+    df.to_excel('student.xlsx',index=False)
+    return FileResponse('student.xlsx', media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename="student.xlsx")
