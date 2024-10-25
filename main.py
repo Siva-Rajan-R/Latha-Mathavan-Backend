@@ -2,18 +2,26 @@ from fastapi import FastAPI
 from FastAPISchema import StudentDetails
 from fastapi.responses import FileResponse
 import pandas as pd
+import pyrebase
 app=FastAPI()
 lis=[]
+config={
+    'apiKey': "AIzaSyCHSvIznxadoPnKL9OybZNbem3b5SZHRD4",
+    'authDomain': "latha-mathavan.firebaseapp.com",
+    'databaseURL': "https://latha-mathavan-default-rtdb.asia-southeast1.firebasedatabase.app",
+    'projectId': "latha-mathavan",
+    'storageBucket': "latha-mathavan.appspot.com",
+    'messagingSenderId': "104476232130",
+    'appId': "1:104476232130:web:1a0d65ccfad0c9533a2e5b",
+    'measurementId': "G-2FNTBB38MQ"
+}
+firebase=pyrebase.initialize_app(config)
+db=firebase.database()
 
 @app.post('/Add-Student')
 def AddUser(student_details:StudentDetails):
-    flag=False
-    for i in lis:
-        print(i['register_number']==student_details.student_register_number)
-        if i['register_number']==student_details.student_register_number:
-            flag=True
-    if flag==False:
-        lis.append({'register_number':student_details.student_register_number,'student_name':student_details.student_name,'student_attedence':student_details.student_attedence,'student_fee':student_details.student_fee})
+    if db.child('latha_mathavan_student_details').child(student_details.student_register_number).get().val()==None:
+        db.child('latha_mathavan_student_details').child(student_details.student_register_number).set({'register_number':student_details.student_register_number,'student_name':student_details.student_name,'student_attedence':student_details.student_attedence,'student_fee':student_details.student_fee})
         return {'detail':'Successfully Added','bool':1}
     return {'detail':'Student Already Exists','bool':0}
     
@@ -21,31 +29,27 @@ def AddUser(student_details:StudentDetails):
 
 @app.put('/Update-Student')
 def UpdateStudent(student_details:StudentDetails):
-    for i in lis:
-        if i['register_number']==student_details.student_register_number:
-            i['student_attedence']=student_details.student_attedence
-            i['student_fee']=student_details.student_fee
-            return {'detail':'Successfully Updated','bool':1}
+    if db.child('latha_mathavan_student_details').child(student_details.student_register_number).get().val()!=None:
+        db.child('latha_mathavan_student_details').child(student_details.student_register_number).update({'student_attedence':student_details.student_attedence,'student_fee':student_details.student_fee})
+        return {'detail':'Successfully Updated','bool':1}
     return {'detail':'Student Not Found','bool':0}
 
 @app.delete('/Delete-Student')
 def DeleteStudent(student_details:StudentDetails):
-    for j,i in enumerate(lis):
-        if i['register_number']==student_details.student_register_number:
-            lis.pop(j)
-            return {'detail':'Successfully Deleted','bool':1}
+    if db.child('latha_mathavan_student_details').child(student_details.student_register_number).get().val()!=None:
+        db.child('latha_mathavan_student_details').child(student_details.student_register_number).remove()
+        return {'detail':'Successfully Deleted','bool':1}
     return {'detail':'Student Not Found','bool':0}
 
 @app.get('/Get-Student')
 def GetStudent():
-    return {'detail':lis}
+    return {'detail':list(db.child('latha_mathavan_student_details').get().val().values())}
 
 @app.get('/Get-Single-Student')
 def GetSingleStudent(student_details:StudentDetails):
-    print(lis)
-    for i in lis:
-        if i['register_number']==student_details.student_register_number:
-            return {'detail':i}
+    detail=db.child('latha_mathavan_student_details').child(student_details.student_register_number).get().val()
+    if detail!=None:
+        return {'detail':{'student_name':detail['student_name'],'student_attedence':detail['student_attedence'],'student_fee':detail['student_fee']}}
     return {'detail':'No Student Found'}
 
 @app.get('/Download-Student')
@@ -56,8 +60,8 @@ def DownloadStudent():
         "Student Attedence": [],
         'Student Fee':[]
     }
-    for i in lis:
-        temp=['Register Number','Student Name','Student Attedence','Student Fee']
+    for i in list(db.child('latha_mathavan_student_details').get().val().values()):
+        temp=['Register Number','Student Attedence','Student Fee','Student Name']
         for j in i:
             data[temp[0]].append(i[j])
             temp.pop(0)
