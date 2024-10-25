@@ -4,7 +4,6 @@ from fastapi.responses import FileResponse
 import pandas as pd
 import pyrebase
 app=FastAPI()
-lis=[]
 config={
     'apiKey': "AIzaSyCHSvIznxadoPnKL9OybZNbem3b5SZHRD4",
     'authDomain': "latha-mathavan.firebaseapp.com",
@@ -65,7 +64,6 @@ def DownloadStudent():
         for j in i:
             data[temp[0]].append(i[j])
             temp.pop(0)
-    print(data)
     df = pd.DataFrame(data)
     df.to_excel('student.xlsx',index=False)
     return FileResponse('student.xlsx', media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename="student.xlsx")
