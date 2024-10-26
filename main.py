@@ -3,16 +3,18 @@ from FastAPISchema import StudentDetails
 from fastapi.responses import FileResponse
 import pandas as pd
 import pyrebase
+import os
 app=FastAPI()
+
 config={
-    'apiKey': "AIzaSyCHSvIznxadoPnKL9OybZNbem3b5SZHRD4",
-    'authDomain': "latha-mathavan.firebaseapp.com",
-    'databaseURL': "https://latha-mathavan-default-rtdb.asia-southeast1.firebasedatabase.app",
-    'projectId': "latha-mathavan",
-    'storageBucket': "latha-mathavan.appspot.com",
-    'messagingSenderId': "104476232130",
-    'appId': "1:104476232130:web:1a0d65ccfad0c9533a2e5b",
-    'measurementId': "G-2FNTBB38MQ"
+    'apiKey': os.getenv('FIREBASE_API_KEY'),
+    'authDomain': os.getenv('FIREBASE_AUTH_DOMAIN'),
+    'databaseURL': os.getenv('FIREBASE_DATABASE_URL'),
+    'projectId': os.getenv('FIREBASE_PROJECT_ID'),
+    'storageBucket': os.getenv('FIREBASE_STORAGE_BUCKET'),
+    'messagingSenderId': os.getenv('FIREBASE_MESSAGING_SENDER_ID') ,
+    'appId': os.getenv('FIREBASE_APP_ID') ,
+    'measurementId': os.getenv('FIREBASE_MEASUREMENT_ID')
 }
 firebase=pyrebase.initialize_app(config)
 db=firebase.database()
